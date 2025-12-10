@@ -75,11 +75,6 @@
     <body>
         <div class="gm4html5_div_class" id="gm4html5_div_id">
             <!-- Create the canvas element the game draws to -->
-			<script>
-                document.addEventListener('touchstart', e => {
-                    e.preventDefault();
-                }, {passive: false})
-            </script>
             <canvas id="canvas" width="720" height="1080"  style="position: absolute; top: 50%; left: 50%; bottom: -50%; right: -50%; transform: translate(-50%, -50%);" >
                      <p>Your browser doesn't support HTML5 canvas.</p>
             </canvas>
@@ -87,6 +82,11 @@
 
         <!-- Run the game code -->
         <script type="text/javascript" src="akinator_game/aki.js?ECWZB=1175548971"></script>
+		<script>
+                document.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                }, {passive: false})
+            </script>
         <script>window.onload = GameMaker_Init;</script>
     </body>
 </html>
