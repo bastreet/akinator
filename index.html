@@ -71,6 +71,112 @@
             }
         </style>
     </head>
+	<input type="text" id="gm_input" 
+       style="position:absolute; left:-9999px; top:-9999px; opacity:0;">
+<style>
+  /* кнопка поверх canvas — будет совпадать по размеру/положению, настроим через JS */
+  #gm_overlay_btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1px;   /* изменим позже из скрипта */
+    height: 1px;  /* изменим позже из скрипта */
+    background: transparent;
+    border: none;
+    z-index: 9999;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* скрытый текстовый input */
+  #gm_input {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    opacity: 0;
+  }
+
+  /* кнопка "Готово" на экране клавиатуры (необязательно) */
+  #gm_done {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 9999;
+    display: none; /* показываем по необходимости */
+  }
+</style>
+
+<input type="text" id="gm_input" autocomplete="off" autocapitalize="off" autocorrect="off" />
+<button id="gm_overlay_btn" aria-hidden="true"></button>
+<button id="gm_done">Готово</button>
+
+	<script>
+	(function(){
+	  var input = document.getElementById('gm_input');
+	  var btn = document.getElementById('gm_overlay_btn');
+	  var done = document.getElementById('gm_done');
+
+	  // при изменении текста — шлём в GameMaker
+	  input.addEventListener('input', function(e){
+		var val = e.target.value;
+		// вызываем GameMaker скрипт gm_on_text_input
+		if (typeof gml_Script_gm_on_text_input === "function") {
+		  try { gml_Script_gm_on_text_input(val); } catch(e) { /* ignore */ }
+		}
+	  });
+
+	  // при нажатии overlay — фокусируем input (пользовательский жест => клавиатура появится)
+	  btn.addEventListener('click', function(e){
+		// очистим, если нужно: input.value = "";
+		input.focus();
+		// показать кнопку "Готово" — опционально
+		done.style.display = "block";
+		// если нужно, можно переместить input в видимую область под canvas
+	  });
+
+	  // кнопка "Готово" снимет фокус
+	  done.addEventListener('click', function(){
+		input.blur();
+		done.style.display = "none";
+	  });
+
+	  // Функция для позиционирования overlay кнопки поверх нужной области
+	  // вызывай window.gm_place_overlay(x,y,w,h) из JS (см. ниже — можно вызвать из GML только при наличии функции)
+	  window.gm_place_overlay = function(x,y,w,h){
+		// координаты в CSS пикселях — можешь конвертировать из внутренней логики GMS
+		btn.style.left = x + 'px';
+		btn.style.top  = y + 'px';
+		btn.style.width = Math.max(1,w) + 'px';
+		btn.style.height = Math.max(1,h) + 'px';
+		btn.style.display = 'block';
+	  };
+
+	  // функция для скрытия overlay
+	  window.gm_hide_overlay = function(){
+		btn.style.display = 'none';
+		done.style.display = 'none';
+		input.blur();
+	  };
+
+	  // если нужно автоматически обновлять положение overlay при ресайзе:
+	  window.addEventListener('resize', function(){
+		// можно обновить позицию из GML (если у тебя GML хранит позицию)
+	  });
+
+	  // (опционально) при загрузке поместим overlay на всё полотно:
+	  // получаем canvas и растягиваем кнопку на весь canvas
+	  function placeFullOverlay(){
+		var cvs = document.querySelector('canvas');
+		if (!cvs) return;
+		var rect = cvs.getBoundingClientRect();
+		window.gm_place_overlay(rect.left, rect.top, rect.width, rect.height);
+	  }
+	  // сначала поставим на весь canvas
+	  placeFullOverlay();
+	  // и обновлять при изменениях
+	  window.addEventListener('orientationchange', placeFullOverlay);
+	  window.addEventListener('resize', placeFullOverlay);
+	})();
+	</script>
 
     <body>
         <div class="gm4html5_div_class" id="gm4html5_div_id">
